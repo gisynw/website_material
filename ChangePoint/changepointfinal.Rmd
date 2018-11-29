@@ -1,0 +1,46 @@
+---
+title: "R Notebook"
+output:  
+  html_notebook:
+    toc: TRUE
+    toc_float: TRUE
+---
+
+#Introduction
+###Implements various mainstream and specialised changepoint methods for finding single and multiple changepoints within data.
+
+
+#Calling R Function Defined In Other Scripts
+## Calling Function directly from the folder
+```{r,message=FALSE, comment= NA}
+setwd(".")
+
+source("change_point.R")
+source("valid_lake_level.R")
+source("total_month.R")
+source("get_month_period.R")
+source("get_level.R")
+```
+
+#Display Data
+##Choose the data using Filte_valid_data function and get_water_level function
+```{r, message=FALSE, comment= NA}
+validdata <- Filte_Valid_data(2)
+validdata
+level <- get_water_leve(validdata)
+level
+```
+
+##Create year month
+### Create time series year month
+```{r, message = FALSE, comment= NA}
+total <- create_month_year(1990, 2016, 5, 10) # run two times(first time download the package)
+yearvalue <- get_the_time_period(validdata, total)
+yearvalue
+```
+
+## Visualize Change Point 
+### Display the change point and lake level change pattern
+```{r, echo=FALSE, message=FALSE, comment= NA, fig.width=9}
+change_point(level, yearvalue)
+```
