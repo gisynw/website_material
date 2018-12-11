@@ -1,0 +1,107 @@
+---
+title: "Data Analysis"
+author: Yanan Wu
+output:  
+  html_notebook:
+    toc: TRUE
+    toc_float: TRUE
+---
+ 
+##Introduction
+ 
+
+## Download the user defined function
+```{r,message=FALSE, comment= NA}
+source("valid_lake_level.R")
+source("get_precipitation.R")
+```
+
+## Summary the useful information 
+```{r,message=FALSE, comment= NA}
+list_ex <- Filte_Valid_data(2)
+list_ex
+```
+
+## Display water level 
+```{r,message=FALSE, comment= NA}
+ water_level <- c()
+  v <- 1
+  for(m in (list_ex[[1]] + 2): (length(list_ex) - 1))
+  {
+    if((m%%2))
+    {
+      water_level[[v]] <- list_ex[[m]] 
+      v <- v+1
+    }
+  } 
+  # waterlevel <- as.numeric(water_level)
+water_level
+```
+
+## User Defined Function
+#### Convert the significnt level from point to number
+```{r,message=FALSE, comment= NA}
+Significant = function(x) {
+  
+  if(x <0.001)
+  {
+    x7 <-'***' 
+  }
+  if((0.001 < x ) & (x < 0.01))
+  {x7 <-'**'}
+  if((0.01 < x ) & (x < 0.05))
+  {x7 <-'*'}
+  if((0.05 < x ) & (x < 0.1))
+  {x7 <-'.'} 
+  if(0.1 < x)
+  {x7 <-' '}
+  return(x7)
+}
+
+```
+
+## Display Precipitation 
+
+```{r,message=FALSE, comment= NA}
+prcp <- get_precipitation_data(list_ex, 3)
+prcp
+```
+
+## Analysis result
+#### linear regression 
+```{r,message=FALSE, comment= NA}
+ first_matrix <- matrix('',1,1)
+  
+  for (k in 1:length(water_level)) 
+  {
+    level <- water_level[[k]]
+    precipitation <- prcp[[k]]
+    correl_coeffi <- cor(level, precipitation, method = "pearson") ## correlation coefficient 
+    lm_result <- lm(level~precipitation)
+    sum_corr <- summary(lm_result)
+    # slope <- sum_corr$coefficients[[2]]
+    p_value <- sum_corr$coefficients[[8]]
+    Sing_level <- Significant(p_value)
+    R_squared <- sum_corr$r.squared 
+    
+    result <- matrix("", 4,1)
+    result[1,] <- round(correl_coeffi,4)
+    result[2,] <- round(R_squared,4)
+    result[3,] <- round(p_value,6)
+    result[4,] <- Sing_level
+    first_matrix <- rbind(first_matrix, result)
+  }
+  row.names(first_matrix)[2:length(row(first_matrix))] <- rep(c("Correlation","R_Squared", "P_Value","Sing_level"), length(water_level))   
+  row.names(first_matrix)[1] <- "ID"
+  first_matrix[1,] <- list_ex[[length(list_ex)]]
+  # write.csv(first_matrix, file <- gsub(" ","", paste(list_ex[[length(list_ex)]],".csv")))
+first_matrix
+
+```
+
+
+
+
+
+
+
