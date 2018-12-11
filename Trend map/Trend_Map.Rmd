@@ -1,0 +1,31 @@
+---
+title: "Trend Map"
+author: Yanan Wu
+output:  
+  html_notebook:
+    toc: TRUE
+    toc_float: TRUE
+---
+
+## Introduction
+### plotting the variables based on the valid time period  
+
+### 5 means correlation, 6 means rsquared, 7 means p-value, 
+### set up the threshold to choose the  appropriate lake level and prcepitation 
+
+## download the function
+```{r, message=FALSE, comment= NA}
+setwd(".")
+source("total_month.R")
+source("Time series water level change trend.R")
+```
+
+## Plotting the variables 
+### select the lake with higher p-value, high correlation
+
+```{r, message=FALSE, comment= NA}
+valid_lake <- valid_length(7, 0.001)
+
+plot_trend_map(valid_lake, 15)
+```
+
