@@ -1,0 +1,137 @@
+---
+title: "Exploratory data analysis"
+author: Yanan Wu
+output:  
+  html_notebook:
+    toc: TRUE
+    toc_float: TRUE
+---
+## Introduction 
+#### applying approach to understanding the messages contained in the data
+```{r,message=FALSE, comment= NA}
+setwd(".")
+source("Significant_level.R")
+source("valid_lake_level.R")
+source("get_level.R")
+source("get_precipitation.R")
+source("data_analysis.R")
+```
+
+## Display lake level
+```{r,message=FALSE, comment= NA}
+list_ex <- Filte_Valid_data(2)
+list_ex
+```
+
+
+## Create the time series 
+```{r,message=FALSE, comment= NA}
+create_month_year <- function(firstyear, lastyear, firstmonth, lastmonth)
+{
+  if (!require("zoo")) install.packages("zoo")
+  library("zoo")
+  start_year <- firstyear
+  end_year <- lastyear
+  start_month <- firstmonth
+  end_month <- lastmonth
+  # year_num <- end_year - start_year + 1
+  num.year <- end_year - start_year + 1  ## the number of years in the time series
+  num.month <- num.year*12-1  
+  all_month <- as.yearmon(start_year + seq(0, num.month)/12) 
+  all_month <- as.Date(all_month)
+  all_month <- all_month[as.numeric(format(all_month,"%m")) >= start_month & as.numeric(format(all_month,"%m")) <= end_month]
+  return(all_month)
+}
+
+total <- create_month_year(1990, 2016, 5, 10)
+```
+
+## Display the time series
+```{r,message=FALSE, comment= NA}
+get_the_time_period <- function(list_ex,all_month)
+{
+  month_matrix <- c()
+  e <- 1
+  for (f in 2:(list_ex[[1]]+1)) 
+    if(!(f %% 2))
+    {
+      month_matrix[[e]] <- all_month[(list_ex[[f]] - 1) : (list_ex[[f+1]] - 1)]
+      e <- e + 1
+    }
+  return(month_matrix)
+}
+parttime <- get_the_time_period(list_ex, total)
+parttime
+```
+
+## Display lake level 
+```{r,message=FALSE, comment= NA}
+level <- get_water_leve(list_ex)
+level
+```
+
+## Display Precipitation 
+```{r,message=FALSE, comment= NA}
+prcp <- get_precipitation_data(list_ex,3)
+prcp
+```
+## Data Analysis
+```{r,message=FALSE, comment= NA}
+analysisresult <- data_analysis(level, prcp, list_ex)
+```
+
+## Exploratory data analysis
+```{r,message=FALSE, comment= NA}
+data_summarize <- function(list_ex,time_period,analysis_result)
+{
+  #empty <- matrix("", 1,6)
+  start <- time_period[[1]][1]
+  end <- time_period[[1]][length(time_period[[1]])]
+  length_time <- length(time_period[[1]])
+  Final <- data.frame(start,end,length_time)
+  if(list_ex[[1]] > 2)
+  {
+    for(i in 2:(list_ex[[1]]/2))
+    {
+      start <- time_period[[i]][1]
+      end <- time_period[[i]][length(time_period[[i]])]
+      length_time <- length(time_period[[i]])
+      Final[i,] <- data.frame(start,end,length_time)
+    } 
+  }
+  ## get the pvalue, singilevel, and rsquared.
+  # pvalue <- analysis_result[2]
+  # singlevel <- analysis_result[3]
+  # rsquared <- analysis_result[4]
+  Yanan <- matrix(" ",(list_ex[[1]]/2),4)
+  # Yanan[1,] <- c(pvalue,singlevel,rsquared)
+  h <- 2
+  for (i in 1:(list_ex[[1]]/2))
+  {
+    correlation <- analysis_result[h]
+    rsquared <- analysis_result[h+1]
+    p_value <- analysis_result[h+2]
+    Sing_level <- analysis_result[h+3]
+    Yanan[i,] <- c(correlation,rsquared,p_value,Sing_level)
+    h <- h +4
+  } 
+  
+  colnames(Yanan) <- c("correlation", "rsquared","p_value","Sing_level")
+  summarizez_data <- cbind(Final,Yanan)
+  summarizez_data <- as.matrix(summarizez_data)
+  summ_rowname <- as.numeric(list_ex[length(list_ex)][1])
+  row.names(summarizez_data) <- rep(summ_rowname,list_ex[[1]]/2)
+  # colnames(empty) <- colnames(summarizez_data)
+  # empty <- rbind(empty,summarizez_data)
+  # write.csv(empty, file = gsub(" ", "",paste("summarize",".csv")))
+  return(summarizez_data)
+}
+data_summarize(list_ex, parttime, analysisresult)
+```
+
+
+
+
+
+
+
