@@ -1,0 +1,69 @@
+---
+title: "Cluster Analysis"
+author: Yanan Wu
+output:  
+  html_notebook:
+    toc: TRUE
+    toc_float: TRUE
+---
+
+```{r,message=FALSE, comment= NA}
+wssplot <- function(data, nc = 15, seed =1234)
+{
+  wss <- (nrow(data)-1)*sum(apply(data,2,var))
+  for( i in 2:nc){
+    set.seed(seed)
+    wss[i] <- sum(kmeans(data,centers = i)$withinss)
+  }
+  plot(1:nc,wss,type = "b", xlab = "Number of clusters",
+       ylab = "Within groups sum of squares")
+}
+
+```
+
+
+```{r,message=FALSE, comment= NA}
+setwd(".")
+total <- list.files(pattern = ".csv")
+total
+
+dfarea <- read.csv(total[1], stringsAsFactors = F)
+
+colength <- length(colnames(dfarea))
+df <- dfarea[,2:colength]
+
+wssplot(df)
+# base::t(df)
+```
+
+
+```{r,message=FALSE, comment= NA}
+set.seed(1234)
+fit.km <- kmeans(df,3, nstart =25)
+fit.km
+fit.km$size
+# fit.km$centers
+fit.km$cluster
+```
+
+```{r,message=FALSE, comment= NA}
+# aggregate(dfarea[-1], by=list(cluster=fit.km$cluster), mean)
+# dfarea$group <- fit.km$cluster
+# ck.km <- table(dfarea$ID, fit.km$cluster)
+# 
+# lin <- matrix(" ", 1,1)
+# for (t in 1:length(dfarea$X)) 
+# {
+#   m <- gregexpr('[0-9]+',dfarea$X[t])
+#   result <- regmatches(dfarea$X[t],m)
+#   dfarea$X[t] <- result
+# }
+dfarea$group <- c(fit.km$cluster)
+dfarea$group
+m <- gregexpr('[0-9]+',total[1])
+result <- regmatches(total[1],m)
+result
+
+
+```
+
