@@ -15,8 +15,8 @@ output:
 ### Calling Function directly from the folder
 ```{r,message=FALSE, comment= NA}
 setwd(".")
-
-source("change_point.R")
+getwd()
+source("change point.R")
 source("valid_lake_level.R")
 source("total_month.R")
 source("get_month_period.R")
